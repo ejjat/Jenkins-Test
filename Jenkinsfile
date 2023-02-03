@@ -2,9 +2,7 @@ node {
     def mvnHome = tool 'maven-3.5.2'
     def dockerImage
     def dockerImageTag = "devopsexample${env.BUILD_NUMBER}"
-	agent{
-		docker { image 'node:16-alpine'}
-	}
+	
     stage('Clone Repo') {
       git 'https://github.com/rhmanou/Jenkins-Test.git'
     }    
@@ -13,12 +11,16 @@ node {
       sh "'${mvnHome}/bin/mvn' -B -DskipTests clean package"
     }
     
-    stage('Initialize Docker'){         
+    stage('Initialize Docker'){
+	    
 	  def dockerHome = tool 'MyDocker'         
 	  env.PATH = "${dockerHome}/bin:${env.PATH}"     
     }
     
     stage('Build Docker Image') {
+	agent{
+		docker { image 'node:16-alpine'}
+	}    
       sh "docker -H tcp://172.17.0.1:4243 build -t devopsexample:${env.BUILD_NUMBER} ."
     }
     
